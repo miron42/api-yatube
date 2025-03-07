@@ -47,7 +47,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Сохраняет комментарий с текущим пользователем как автором."""
-        print(f"Saving comment with author: {self.request.user}")  # Логирование
         serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
