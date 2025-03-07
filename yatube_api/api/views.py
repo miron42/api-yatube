@@ -43,12 +43,13 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Comment с поддержкой CRUD операций."""
+
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        """Сохраняет комментарий с текущим пользователем как автором и указанным постом."""
+        """Сохраняет коммент с текущим юзером-автором и указанным постом."""
         post_id = self.kwargs.get('post_id')
         post = get_object_or_404(Post, id=post_id)
         serializer.save(author=self.request.user, post=post)
