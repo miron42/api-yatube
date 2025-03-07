@@ -1,8 +1,8 @@
 """Вьюсеты для моделей приложения Yatube."""
-from rest_framework import viewsets, status
+
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
 from posts.models import Post, Group, Comment
@@ -44,9 +44,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Comment с поддержкой CRUD операций."""
 
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Возвращает кверисет комментариев, связанных с указанным постом."""
+        post_id = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, id=post_id)
+        return Comment.objects.filter(post=post)
 
     def perform_create(self, serializer):
         """Сохраняет коммент с текущим юзером-автором и указанным постом."""
@@ -65,35 +70,3 @@ class CommentViewSet(viewsets.ModelViewSet):
         if instance.author != self.request.user:
             raise PermissionDenied('Удаление чужого контента запрещено!')
         instance.delete()
-
-    def update(self, request, *args, **kwargs):
-        """Обработка запроса на обновление комментария."""
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
-    def destroy(self, request, *args, **kwargs):
-        """Обработка запроса на удаление комментария."""
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_object(self):
-        """Получает объект комментария, проверяя существование поста."""
-        comment_id = self.kwargs.get('pk')
-        post_id = self.kwargs.get('post_id')
-        post = get_object_or_404(Post, id=post_id)
-        comment = get_object_or_404(Comment, id=comment_id, post=post)
-        return comment
-
-    def list(self, request, *args, **kwargs):
-        """Обработка GET-запроса для получения всех комментариев к посту."""
-        post_id = self.kwargs.get('post_id')
-        post = get_object_or_404(Post, id=post_id)
-        comments = Comment.objects.filter(post=post)
-        serializer = self.get_serializer(comments, many=True)
-        return Response(serializer.data)
