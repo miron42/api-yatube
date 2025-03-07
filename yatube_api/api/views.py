@@ -89,3 +89,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comment, id=comment_id, post=post)
         return comment
+
+    def list(self, request, *args, **kwargs):
+        """Обработка GET-запроса для получения всех комментариев к посту."""
+        post_id = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, id=post_id)
+        comments = Comment.objects.filter(post=post)
+        serializer = self.get_serializer(comments, many=True)
+        return Response(serializer.data)
