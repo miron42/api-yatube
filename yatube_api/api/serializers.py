@@ -30,6 +30,7 @@ class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Comment."""
 
     author = serializers.ReadOnlyField(source='author.username')
+    post = serializers.ReadOnlyField(source='post.id')
 
     class Meta:
         """Метакласс для сериализатора CommentSerializer."""
