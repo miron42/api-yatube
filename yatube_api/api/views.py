@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
-from posts.models import Post, Group, Comment
+from posts.models import Post, Group
 from .serializers import PostSerializer, GroupSerializer, CommentSerializer
 
 
@@ -48,10 +48,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Возвращает кверисет комментариев, связанных с указанным постом."""
+        """Возвращает кверисет комментариев."""
         post_id = self.kwargs.get('post_id')
         post = get_object_or_404(Post, id=post_id)
-        return Comment.objects.filter(post=post)
+        return post.comments.all()
 
     def perform_create(self, serializer):
         """Сохраняет коммент с текущим юзером-автором и указанным постом."""

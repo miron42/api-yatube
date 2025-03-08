@@ -10,15 +10,12 @@ class PostSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True)
-    group = serializers.PrimaryKeyRelatedField(
-        queryset=Group.objects.all(), required=False, allow_null=True)
 
     class Meta:
         """Метакласс для сериализатора PostSerializer."""
 
         model = Post
         fields = ('id', 'author', 'text', 'pub_date', 'group', 'image')
-        read_only_fields = ('author', 'pub_date')
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -36,10 +33,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True)
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         """Метакласс для сериализатора CommentSerializer."""
-
         model = Comment
         fields = ('id', 'author', 'post', 'text', 'created')
-        read_only_fields = ('author', 'post')
